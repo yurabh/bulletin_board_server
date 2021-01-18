@@ -1,0 +1,29 @@
+
+### IntelliJ IDEA ###
+.idea/artifacts
+.idea/compiler.xml
+.idea/workspace.xml
+.idea/dataSources.xml
+.idea/dataSources
+.idea/dataSources.local.xml
+
+target/bulletinBoardServer-1.0-SNAPSHOT.war
+
+### Logger ###
+log_file.log
+
+### Description project ###
+bulletin_Board_Server_Project.txt
+
+### iml one ###
+bulletinBoardServer.iml
+
+### iml two ###
+scr/mail/main.iml
+
+### test iml ###
+*.iml
+**/*.iml
+
+### target ###
+target
