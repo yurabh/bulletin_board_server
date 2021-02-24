@@ -1,20 +1,21 @@
 package com.service;
 
-import com.dao.AuthorDao;
-import com.domain.Author;
+import com.dto.AuthorDto;
 
 /**
- * {@link AuthorService} interface binds realization part with user and binds {@link AuthorDao} layer
+ * {@link AuthorService} interface binds realization part with user
+ * and binds {@link com.dao.AuthorDao} layer.
  *
- * @author Yuriy Bahlay
- * @version 1.1
+ * @author Yuriy Bahlay.
+ * @version 1.1.
  */
 
-public interface AuthorService extends CRUDService<Author> {
+public interface AuthorService extends CRUDService<AuthorDto> {
 
     /**
-     * This is an interface method pass author id to the {@link AuthorDao#deleteAnnouncementsByAuthorId(int)}
-     * to remove all announcements by a specific author id
+     * This is an interface method pass author id to the
+     * {@link com.dao.AuthorDao #deleteAnnouncementsByAuthorId(int)}
+     * to remove all announcements by a specific author id.
      *
      * @param id int
      */

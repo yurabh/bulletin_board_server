@@ -1,15 +1,19 @@
 package com.service;
 
 import com.config.ConfigAppTest;
+import com.constant.NumberConstant;
 import com.domain.Announcement;
 import com.domain.Author;
 import com.domain.Heading;
+import com.dto.AnnouncementDto;
+import com.dto.HeadingDto;
 import com.repository.AnnouncementRepository;
 import com.repository.AuthorRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -18,147 +22,208 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+
 import java.time.LocalDate;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.IntStream;
 
 /**
- * This is a class for testing the class of the {@link AnnouncementService} and its methods
+ * This is a class for testing the class of the
+ * {@link AnnouncementService} and its methods.
  */
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringJUnitConfig(ConfigAppTest.class)
 @WebAppConfiguration
-@Sql(scripts = {"classpath:scripts/truncate_tables/truncate_table_announcement.sql",
-        "classpath:scripts/truncate_tables/truncate_table_author.sql",
-        "classpath:scripts/truncate_tables/truncate_table_heading.sql"},
+@Sql(scripts =
+        {"classpath:scripts/truncate_tables/truncate_table_announcement.sql",
+                "classpath:scripts/truncate_tables/truncate_table_author.sql",
+                "classpath:scripts/truncate_tables/truncate_table_heading.sql"},
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class AnnouncementServiceTest {
 
 
     /**
-     * This is a field for injection {@link AnnouncementService} in this class
+     * This is a field for injection
+     * {@link AnnouncementService} in this class.
      */
     @Autowired
     private AnnouncementService announcementService;
 
 
     /**
-     * This is a field for injection {@link HeadingService} in this class
+     * This is a field for injection {@link HeadingService} in this class.
      */
     @Autowired
     private HeadingService headingService;
 
 
     /**
-     * This is a field for injection {@link AuthorRepository} in this class
+     * This is a field for injection {@link AuthorRepository} in this class.
      */
     @Autowired
     private AuthorRepository authorRepository;
 
 
     /**
-     * This is a field for injection {@link AuthorService} in this class
+     * This is a field for injection {@link AuthorService} in this class.
      */
     @Autowired
     private AuthorService authorService;
 
 
     /**
-     * This is a field for injection {@link AnnouncementRepository} in this class
+     * This is a field for injection {@link AnnouncementRepository}
+     * in this class.
      */
     @Autowired
     private AnnouncementRepository announcementRepository;
 
 
     /**
-     * This is a field {@link Announcement} we use it for testing too
+     * This is {@link org.modelmapper.ModelMapper} for mapping
+     * object.
      */
-    private Announcement announcement;
+    @Autowired
+    private ModelMapper modelMapper;
 
 
     /**
-     * This is a field {@link Heading} we use it for testing too
+     * This is a field {@link Heading} we use it for testing too.
      */
     private Heading heading;
 
 
     /**
-     * This is a field {@link Author} we use it for testing too
+     * This is a field {@link Author} we use it for testing too.
      */
     private Author author;
 
 
     /**
-     * This is a test method that tests the storage of {@link AnnouncementService#save(Object)}
-     * in the database before each test
+     * This is field {@link AnnouncementDto} for testing.
+     */
+    private AnnouncementDto announcementDto;
+
+
+    /**
+     * This is a test method that tests the storage of
+     * {@link AnnouncementService#save(Object)}
+     * in the database before each test.
      */
     @Before
     public void saveAnnouncementBeforeEach() {
 
-        BigDecimal serviceCost = new BigDecimal(300.11).setScale(2, RoundingMode.UP);
+        BigDecimal serviceCost = new BigDecimal(
+                NumberConstant.THREE_HUNDRED_AND_ELEVEN_NUMBER)
+                .setScale(2, RoundingMode.UP);
 
-        announcement = new Announcement("Announcement", LocalDate.now(), "I wonna go", serviceCost);
+        Announcement announcement = new Announcement("Announcement",
+                LocalDate.now(), "I wonna go", serviceCost);
 
         announcement.setActive(true);
 
+        announcement.setVersion(0);
+
         author = new Author("Announcement");
+
+        author.setActive(true);
+
+        author.setVersion(0);
+
+        author.setLastName("Bahlay");
+
+        author.setPassword("11111");
 
         authorRepository.save(author);
 
         announcement.setAuthor(author);
 
-        heading = new Heading("Announcement");
+        heading = new Heading();
 
-        headingService.save(heading);
+        heading.setVersion(0);
+
+        heading.setName("Announcement");
+
+        final HeadingDto headingDto = modelMapper
+                .map(heading, HeadingDto.class);
+
+        try {
+            headingService.save(headingDto);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         announcement.setHeading(heading);
 
-        announcementService.save(announcement);
+        announcementDto = modelMapper.map(announcement, AnnouncementDto.class);
 
-        compareTwoAnnouncement(announcement, announcementService.find(1));
+        announcementDto.setAuthor(1);
+
+        heading.setId(1);
+
+        announcementDto.setHeading(heading);
+
+        try {
+            announcementService.save(announcementDto);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        announcementDto.setId(1);
+
+        compareTwoAnnouncementDto(announcementDto, announcementService.find(1));
     }
 
 
     /**
-     * This is a test method that tests for finding of {@link AnnouncementService#find(int)} in the database
+     * This is a test method that tests for finding of
+     * {@link AnnouncementService#find(int)} in the database.
      */
     @Test
     public void shouldFindAnnouncement() {
-        compareTwoAnnouncement(announcement, announcementService.find(1));
+        compareTwoAnnouncementDto(announcementDto, announcementService.find(1));
     }
 
 
     /**
-     * This is a test method that tests for updating of {@link AnnouncementService#update(Object)} in the database
+     * This is a test method that tests for updating of
+     * {@link AnnouncementService#update(Object)} in the database.
      */
     @Test
     public void shouldUpdateAnnouncement() {
 
-        announcement.setActive(false);
+        announcementDto.setActive(false);
 
-        BigDecimal serviceCost = new BigDecimal(1000.00).setScale(2, RoundingMode.UP);
+        BigDecimal serviceCost = new BigDecimal(NumberConstant.ONE_HUNDRED)
+                .setScale(2, RoundingMode.UP);
 
-        announcement.setServiceCost(serviceCost);
+        announcementDto.setServiceCost(serviceCost);
 
-        announcement.setRevelationText("I want to sell");
+        announcementDto.setRevelationText("I want to sell");
 
-        announcement.setPublicationDate(LocalDate.of(2000, 7, 30));
+        announcementDto.setPublicationDate(LocalDate.of(NumberConstant.YEAR,
+                NumberConstant.MONTH, NumberConstant.DAY_OF_MONTH));
 
-        announcement.setName("Update");
+        announcementDto.setName("Update");
 
-        announcementService.update(announcement);
+        try {
+            announcementService.update(announcementDto);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        announcement.setVersion(1);
+        announcementDto.setVersion(1);
 
-        compareTwoAnnouncement(announcement, announcementService.find(1));
+        compareTwoAnnouncementDto(announcementDto, announcementService.find(1));
     }
 
 
     /**
-     * This is a test method that tests for deleting of {@link AnnouncementService#delete(int)} in the database
+     * This is a test method that tests for deleting of
+     * {@link AnnouncementService#delete(int)} in the database.
      */
     @Test
     public void shouldDeleteAnnouncement() {
@@ -170,8 +235,9 @@ public class AnnouncementServiceTest {
 
 
     /**
-     * This is a test method that tests for deleting of {@link AnnouncementService#deleteAnnouncementById(int)}
-     * in the database
+     * This is a test method that tests for deleting of
+     * {@link AnnouncementService#deleteAnnouncementById(int)}
+     * in the database.
      */
     @Test
     public void shouldDeleteAnnouncementById() {
@@ -183,18 +249,20 @@ public class AnnouncementServiceTest {
 
 
     /**
-     * This is a test method that tests for deleting of {@link AuthorService#deleteAnnouncementsByAuthorId (int)}
-     * in the database
+     * This is a test method that tests for deleting of
+     * {@link AuthorService#deleteAnnouncementsByAuthorId (int)}
+     * in the database.
      */
     @Test
     public void shouldDeleteAnnouncementsByAuthorId() {
 
-        BigDecimal serviceCost = new BigDecimal(300.11).setScale(2, RoundingMode.UP);
+        BigDecimal serviceCost = new BigDecimal(
+                NumberConstant.THREE_HUNDRED_AND_ELEVEN_NUMBER).
+                setScale(2, RoundingMode.UP);
 
-        Announcement announcementOne = new Announcement(0, "Tomasadafefd", LocalDate.now(),
-                "I wonna go", true, serviceCost, heading, author);
-
-        announcementService.save(announcementOne);
+        Announcement announcementOne = new Announcement(0, 0,
+                "Tomas", LocalDate.now(), "I wonna go",
+                true, serviceCost, heading, author);
 
         authorService.deleteAnnouncementsByAuthorId(1);
 
@@ -203,159 +271,227 @@ public class AnnouncementServiceTest {
 
 
     /**
-     * This is a test method that tests for finding all announcements from {@link Heading#id} of
-     * {@link AnnouncementService#getAllByHeadingId(int)} in the database
+     * This is a test method that tests for finding all announcements
+     * from {@link Heading#id} of
+     * {@link AnnouncementService#getAllByHeadingId(int)} in the database.
      */
     @Test
     public void shouldGetAllAnnouncementsByHeadingId() {
 
-        List<Announcement> listOfAnnouncements = getListOfAnnouncements();
+        List<AnnouncementDto> listOfAnnouncements = getListOfAnnouncementsDto();
 
-        List<Announcement> allByHeadingId = announcementService.getAllByHeadingId(1);
+        List<AnnouncementDto> allByHeadingId = announcementService.
+                getAllByHeadingId(1);
 
-        IntStream.range(0, 3).forEach(index -> {
-            compareTwoAnnouncement(listOfAnnouncements.get(index), allByHeadingId.get(index));
-        });
+        for (int i = 0; i < NumberConstant.THREE_NUMBER; i++) {
+            compareTwoAnnouncementDto(listOfAnnouncements
+                    .get(i), allByHeadingId.get(i));
+        }
     }
 
 
     /**
      * This is a test method that tests for finding all announcements of
-     * {@link AnnouncementService#filterAllByDate(LocalDate)} in the database
+     * {@link AnnouncementService#filterAllByDate(LocalDate)} in the database.
      */
     @Test
     public void shouldGetAllAnnouncementsByDate() {
 
-        List<Announcement> listOfAnnouncements = getListOfAnnouncements();
+        List<AnnouncementDto> listOfAnnouncements = getListOfAnnouncementsDto();
 
-        List<Announcement> filteredAllByDate = announcementService.filterAllByDate(LocalDate.now());
+        List<AnnouncementDto> filteredAllByDate = announcementService.
+                filterAllByDate(LocalDate.now());
 
-        IntStream.range(0, 3).forEach(index -> {
-            compareTwoAnnouncement(listOfAnnouncements.get(index), filteredAllByDate.get(index));
-        });
+        for (int i = 0; i < NumberConstant.THREE_NUMBER; i++) {
+            compareTwoAnnouncementDto(listOfAnnouncements.
+                    get(i), filteredAllByDate.get(i));
+        }
     }
 
 
     /**
      * This is a test method that tests for finding all announcements of
-     * {@link AnnouncementService#filterAllByRevelationText(String)} in the database
+     * {@link AnnouncementService#filterAllByRevelationText(String)}
+     * in the database.
      */
     @Test
     public void shouldGetAllAnnouncementsByRevelationText() {
 
-        List<Announcement> listOfAnnouncements = getListOfAnnouncements();
+        List<AnnouncementDto> listOfAnnouncements = getListOfAnnouncementsDto();
 
-        List<Announcement> filteredByRevelation = announcementService.filterAllByRevelationText("I wonna go");
+        List<AnnouncementDto> filteredByRevelation = announcementService
+                .filterAllByRevelationText("I wonna go");
 
-        IntStream.range(0, 3).forEach(index -> {
-            compareTwoAnnouncement(listOfAnnouncements.get(index), filteredByRevelation.get(index));
-        });
+        for (int i = 0; i < NumberConstant.THREE_NUMBER; i++) {
+            compareTwoAnnouncementDto(listOfAnnouncements
+                    .get(i), filteredByRevelation.get(i));
+        }
     }
 
 
     /**
      * This is a method for testing announcements pagination of
-     * {@link AnnouncementService#showSomeAnnouncementsPagination(int, int)} in the database
+     * {@link AnnouncementService#showSomeAnnouncementsPagination(int, int)}
+     * in the database.
      */
     @Test
     public void shouldGetSomeAnnouncementsPagination() {
 
-        List<Announcement> listOfAnnouncements = getListOfAnnouncements();
+        List<AnnouncementDto> listOfAnnouncements = getListOfAnnouncementsDto();
 
-        List<Announcement> listSomePagination = announcementService.showSomeAnnouncementsPagination(0, 3);
+        List<AnnouncementDto> listSomePagination = announcementService
+                .showSomeAnnouncementsPagination(
+                        0, NumberConstant.THREE_NUMBER);
 
-        IntStream.range(0, 3).forEach(index -> {
-            compareTwoAnnouncement(listOfAnnouncements.get(index), listSomePagination.get(index));
-        });
+        for (int i = 0; i < NumberConstant.THREE_NUMBER; i++) {
+            compareTwoAnnouncementDto(listOfAnnouncements
+                    .get(i), listSomePagination.get(i));
+        }
     }
 
 
     /**
      * This is a test method which test method of
-     * {@link HeadingService#getAnnouncementsFromSomeHeadings(List)} in the database for getting all announcements
-     * from some headings by {@link List<Integer>} ids
+     * {@link HeadingService#getAnnouncementsFromSomeHeadings(List)}
+     * in the database for getting all announcements from some headings by
+     * {@link List<Integer>} ids.
      */
     @Test
     public void shouldGetAllAnnouncementsFromSomeHeadings() {
 
-        List<Announcement> listOfAnnouncements = getListOfAnnouncements();
+        List<AnnouncementDto> listOfAnnouncements = getListOfAnnouncementsDto();
 
-        Heading headingOne = new Heading("Anastasok");
+        Heading headingOne = new Heading(0, 0, "Anastasok");
 
-        headingService.save(headingOne);
+        final HeadingDto headingDto = modelMapper
+                .map(headingOne, HeadingDto.class);
 
-        BigDecimal serviceCost = new BigDecimal(300.11).setScale(2, RoundingMode.UP);
+        try {
+            headingService.save(headingDto);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        Announcement announcementOne = new Announcement(0, "Tomasadafefd", LocalDate.now(),
-                "I wonna go", true, serviceCost, headingOne, author);
+        BigDecimal serviceCost = new BigDecimal(
+                NumberConstant.THREE_HUNDRED_AND_ELEVEN_NUMBER)
+                .setScale(2, RoundingMode.UP);
+
+        headingOne.setId(1);
+
+        Announcement announcementOne = new Announcement(0, 0,
+                "Tomasadafefd", LocalDate.now(), "I wonna go",
+                true, serviceCost, headingOne, author);
 
 
-        Announcement announcementTwo = new Announcement(0, "Tomasadafefd", LocalDate.now(),
-                "I wonna go", true, serviceCost, headingOne, author);
+        Announcement announcementTwo = new Announcement(0, 0,
+                "Tomasadafefd", LocalDate.now(), "I wonna go",
+                true, serviceCost, headingOne, author);
 
-        announcementService.save(announcementOne);
+        final AnnouncementDto announcementDtoOne = modelMapper
+                .map(announcementOne, AnnouncementDto.class);
 
-        announcementService.save(announcementTwo);
+        final AnnouncementDto announcementDtoTwo = modelMapper
+                .map(announcementTwo, AnnouncementDto.class);
 
-        listOfAnnouncements.add(announcementOne);
+        try {
+            announcementService.save(announcementDtoOne);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        listOfAnnouncements.add(announcementTwo);
+        try {
+            announcementService.save(announcementDtoTwo);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        List<Announcement> announcementsFromSomeHeadings = headingService.getAnnouncementsFromSomeHeadings
-                (Arrays.asList(1, 2));
+        announcementDtoOne.setId(NumberConstant.FOUR);
 
-        IntStream.range(0, 5).forEach(index -> {
-            compareTwoAnnouncement(listOfAnnouncements.get(index), announcementsFromSomeHeadings.get(index));
-        });
+        announcementDtoTwo.setId(NumberConstant.FIVE_NUMBER);
+
+        listOfAnnouncements.add(announcementDtoOne);
+
+        listOfAnnouncements.add(announcementDtoTwo);
+
+        List<Announcement> announcementsFromSomeHeadings = headingService
+                .getAnnouncementsFromSomeHeadings(Arrays.asList(1, 2));
+
+        for (int i = 0; i < NumberConstant.FIVE_NUMBER; i++) {
+            final Announcement announcementThree =
+                    announcementsFromSomeHeadings.get(i);
+            final AnnouncementDto announcementDtoThree = modelMapper
+                    .map(announcementThree, AnnouncementDto.class);
+            compareTwoAnnouncementDto(listOfAnnouncements
+                    .get(i), announcementDtoThree);
+        }
     }
 
 
     /**
-     * This method creates two announcement objects for other test methods
-     */
-    private List<Announcement> getListOfAnnouncements() {
-
-        BigDecimal serviceCost = new BigDecimal(300.11).setScale(2, RoundingMode.UP);
-
-        Announcement announcementOne = new Announcement(0, "Tomasadafefd", LocalDate.now(),
-                "I wonna go", true, serviceCost, heading, author);
-
-        Announcement announcementTwo = new Announcement(0, "kolonaTwo", LocalDate.now(),
-                "I wonna go", false, serviceCost, heading, author);
-
-        announcementService.save(announcementOne);
-
-        announcementService.save(announcementTwo);
-
-        ArrayList<Announcement> announcements = new ArrayList<>();
-
-        announcements.add(announcement);
-
-        announcements.add(announcementOne);
-
-        announcements.add(announcementTwo);
-
-        return announcements;
-    }
-
-
-    /**
-     * This private method which's compare two Announcement
+     * This method creates two announcementDto objects
+     * for other test methods.
      *
-     * @param target {@link Announcement}
-     * @param source {@link Announcement}
+     * @return List<AnnouncementDto>.
      */
-    private void compareTwoAnnouncement(Announcement target, Announcement source) {
+    private List<AnnouncementDto> getListOfAnnouncementsDto() {
+
+        BigDecimal serviceCost = new BigDecimal(
+                NumberConstant.THREE_HUNDRED_AND_ELEVEN_NUMBER).
+                setScale(2, RoundingMode.UP);
+
+        AnnouncementDto announcementOne = new AnnouncementDto(0, 0,
+                "Tomasadafefd", true, LocalDate.now(),
+                "I wonna go", serviceCost, author.getId(), heading);
+
+        AnnouncementDto announcementTwo = new AnnouncementDto(0, 0,
+                "kolonaTwo", false, LocalDate.now(),
+                "I wonna go", serviceCost, author.getId(), heading);
+
+        try {
+            announcementService.save(announcementOne);
+
+            announcementService.save(announcementTwo);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        ArrayList<AnnouncementDto> announcementsDto = new ArrayList<>();
+
+        announcementOne.setId(2);
+
+        announcementTwo.setId(NumberConstant.THREE_NUMBER);
+
+        announcementsDto.add(announcementDto);
+
+        announcementsDto.add(announcementOne);
+
+        announcementsDto.add(announcementTwo);
+
+        return announcementsDto;
+    }
+
+
+    /**
+     * This private method which's compare two AnnouncementDto.
+     *
+     * @param target {@link AnnouncementDto}.
+     * @param source {@link AnnouncementDto}.
+     */
+    private void compareTwoAnnouncementDto(
+            final AnnouncementDto target, final AnnouncementDto source) {
 
         Assert.assertEquals(target.getId(), source.getId());
 
         Assert.assertEquals(target.getVersion(), source.getVersion());
 
-        Assert.assertEquals(target.getRevelationText(), source.getRevelationText());
+        Assert.assertEquals(
+                target.getRevelationText(), source.getRevelationText());
 
-        BigDecimal expected = target.getServiceCost().setScale(2, RoundingMode.UP);
+        BigDecimal expected = target.getServiceCost()
+                .setScale(2, RoundingMode.UP);
 
-        BigDecimal actual = source.getServiceCost().setScale(2, RoundingMode.UP);
+        BigDecimal actual = source.getServiceCost()
+                .setScale(2, RoundingMode.UP);
 
         Assert.assertEquals(expected, actual);
 
@@ -363,6 +499,7 @@ public class AnnouncementServiceTest {
 
         Assert.assertEquals(target.isActive(), source.isActive());
 
-        Assert.assertEquals(target.getPublicationDate(), source.getPublicationDate());
+        Assert.assertEquals(
+                target.getPublicationDate(), source.getPublicationDate());
     }
 }

@@ -1,22 +1,35 @@
 package com.controller;
 
-import com.domain.Author;
-import com.exception.*;
+import com.constant.ExceptionConstant;
+import com.constant.LoggerConstants;
+import com.dto.AuthorDto;
+import com.exception.custom_exception.AuthorException;
+import com.exception.custom_exception.DuplicateDataException;
 import com.service.AuthorService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.*;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validator;
 import java.util.Set;
 
 /**
- * Class {@link AuthorController} using to perform author operations and save,delete,update and other for user
+ * Class {@link AuthorController} using to perform author operations and
+ * save,delete,update and other for user.
  *
- * @author Yuriy Bahlay
- * @version 1.1
+ * @author Yuriy Bahlay.
+ * @version 1.1.
  */
 
 @RestController
@@ -25,150 +38,159 @@ public class AuthorController {
 
 
     /**
-     * This is field of class {@link Logger} returns a logger for this controller
+     * This is field of class {@link Logger}
+     * returns a logger for this controller.
      */
-    private static final Logger LOGGER = Logger.getLogger(AuthorController.class);
+    private static final Logger LOGGER = Logger.
+            getLogger(AuthorController.class);
 
 
     /**
-     * Field {@link AuthorService} is object instance of {@link AuthorService}
-     * interface with {@link Author} type.
-     * It connects realization part with user application
+     * Field {@link AuthorService} is object instance
+     * of {@link AuthorService} interface with {@link com.domain.Author} type.
+     * It connects realization part with user application.
      */
-    private AuthorService authorService;
+    private final AuthorService authorService;
 
 
     /**
-     * This static field use for validation bean instances.This is object instance of {@link Validator}
+     * This field use for validation bean instances.
+     * This is object instance of {@link Validator}.
      */
-    private static Validator validator;
+    private Validator validator;
 
 
     /**
-     * This is a static block.It use for is the entry point for Jakarta Bean @Validation
-     * and Builds and returns a {@link ValidatorFactory} instance based on the default
-     * Jakarta Bean Validation provider and following the XML configuration
-     */
-    static {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
-    }
-
-
-    /**
-     * This is a constructor that injects object gain of the {@link AuthorService}
-     * into the {@link AuthorController} class
+     * This is a constructor that injects object gain of the
+     * {@link AuthorService} into the {@link AuthorController} class.
      *
-     * @param authorService {@link AuthorService}
+     * @param serviceAuthor {@link AuthorService}.
      */
     @Autowired
-    public AuthorController(AuthorService authorService) {
-        this.authorService = authorService;
-
+    public AuthorController(
+            final AuthorService serviceAuthor) {
+        this.authorService = serviceAuthor;
     }
 
 
     /**
-     * This is a method that takes a author object from client and passes it to the
-     * {@link AuthorService#save(Object)} method save
+     * This is method for injecting {@link Validator}.
+     * It'll injects class {@link Validator}
+     * in controllers such as:
+     * {@link AuthorController}
+     * and AuthorControllerTest for test cases.
      *
-     * @param author {@link Author}
+     * @param validatorAuthor {@link Validator}.
+     */
+    @Autowired
+    public void setValidator(final Validator validatorAuthor) {
+        this.validator = validatorAuthor;
+    }
+
+
+    /**
+     * This is a method that takes a author object from client and
+     * passes it to the{@link AuthorService#save(Object)} method save.
+     *
+     * @param authorDto {@link AuthorDto}.
+     * @throws ConstraintViolationException if Author couldn't save.
+     * @throws DuplicateDataException       if Author couldn't save.
      */
     @PostMapping(value = "/authors")
-    public void save(@RequestBody Author author) {
-        Set<ConstraintViolation<Author>> violations = validator.validate(author);
-        if (violations.size() > 0) {
+    public void save(@RequestBody final AuthorDto authorDto)
+            throws DuplicateDataException {
+        Set<ConstraintViolation<AuthorDto>> violations = validator.
+                validate(authorDto);
+        if (!violations.isEmpty()) {
+            LOGGER.error(violations.toString());
             throw new ConstraintViolationException(violations);
         }
-        authorService.save(author);
-        LOGGER.info("Author saved");
+        try {
+            authorService.save(authorDto);
+            LOGGER.info(LoggerConstants.AUTHOR_SAVED);
+        } catch (Exception e) {
+            LOGGER.error(e.getCause().getCause().toString());
+            throw new DuplicateDataException(
+                    e.getCause().getCause().toString());
+        }
     }
 
 
     /**
-     * This handler only intercepts the exception in the case of an exception in the method
-     * {@link AuthorController#save(Author)}
+     * This method returns to the client a certain authorDto on a certain
+     * identifier author and passes the id to the
+     * {@link AuthorService#find(int)} for finding.
      *
-     * @param e accepts exception {@link ConstraintViolationException}
-     * @return {@link ResponseEntity} with error message and error status
-     */
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<String> throwExceptionSaveAuthor(ConstraintViolationException e) {
-        LOGGER.error(e.getMessage());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
-    }
-
-
-    /**
-     * This method returns to the client a certain author on a certain identifier author and passes the id to the
-     * {@link AuthorService#find(int)} for finding
-     *
-     * @param id int author id
-     * @return author {@link Author}
-     * @throws AuthorFindException if {@link Author} could'nt find
+     * @param id int author id.
+     * @return authorDto {@link AuthorDto}.
+     * @throws AuthorException if {@link com.domain.Author} could'nt find.
      */
     @GetMapping(value = "/authors/{id}")
-    public ResponseEntity<Author> find(@PathVariable("id") int id) throws AuthorFindException {
-        Author author = authorService.find(id);
-        if (author == null) {
-            LOGGER.error("Cannot find author by id: " + id);
-            throw new AuthorFindException("Cannot find author by id: " + id);
+    public ResponseEntity<AuthorDto> find(
+            @PathVariable("id") final int id) throws AuthorException {
+        AuthorDto authorDto = authorService.find(id);
+        if (authorDto == null) {
+            LOGGER.error(LoggerConstants.AUTHOR_NOT_FOUND + id);
+            throw new AuthorException(ExceptionConstant
+                    .AUTHOR_GET_EXCEPTION + id);
         }
-        LOGGER.info("Author found by id: " + id);
-        return new ResponseEntity<>(author, HttpStatus.FOUND);
+        LOGGER.info(LoggerConstants.AUTHOR_FOUND + id);
+        return new ResponseEntity<>(authorDto, HttpStatus.FOUND);
     }
 
 
     /**
-     * This handler only intercepts the exception in the case of an exception in the method
-     * {@link AuthorController#find(int)}
+     * This method takes an authorDto object with some id from the
+     * client and passes it in {@link AuthorService#update(Object)}
+     * for updating.
      *
-     * @param e exception {@link AuthorFindException}
-     * @return {@link ResponseEntity)} with error message and error status
-     */
-    @ExceptionHandler(AuthorFindException.class)
-    public ResponseEntity<String> throwExceptionFindAuthor(AuthorFindException e) {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-
-    /**
-     * This method takes an author object with some id from the client and passes it in
-     * {@link AuthorService#update(Object)} for updating
-     *
-     * @param author {@link Author} with new parameters for setting up
+     * @param authorDto {@link AuthorDto} with new parameters
+     *                  for setting up.
+     * @throws ConstraintViolationException if author couldn't update.
+     * @throws DuplicateDataException       if author couldn't update.
      */
     @PutMapping(value = "/authors")
-    public void update(@RequestBody Author author) {
-        Set<ConstraintViolation<Author>> violations = validator.validate(author);
-        if (violations.size() > 0) {
+    public void update(@RequestBody final AuthorDto authorDto)
+            throws DuplicateDataException {
+        Set<ConstraintViolation<AuthorDto>> violations = validator.
+                validate(authorDto);
+        if (!violations.isEmpty()) {
+            LOGGER.error(violations.toString());
             throw new ConstraintViolationException(violations);
         }
-        authorService.update(author);
-        LOGGER.info("Author updated");
+        try {
+            authorService.update(authorDto);
+            LOGGER.info(LoggerConstants.AUTHOR_UPDATE);
+        } catch (Exception e) {
+            LOGGER.error(e.getCause().getCause().toString());
+            throw new DuplicateDataException(
+                    e.getCause().getCause().toString());
+        }
     }
 
 
     /**
-     * This method takes an ID from the client to delete a specific author and passes it to
-     * {@link AuthorService#delete(int)} for deleting
+     * This method takes an ID from the client to delete a specific author
+     * and passes it to {@link AuthorService#delete(int)} for deleting.
      *
-     * @param id int
+     * @param id int.
      */
     @DeleteMapping(value = "/authors/{id}")
-    public void delete(@PathVariable("id") int id) {
+    public void delete(@PathVariable("id") final int id) {
         authorService.delete(id);
     }
 
 
     /**
-     * This method takes an ID from the client to deleteAnnouncementsByAuthorId a specific author id and passes it to
-     * {@link AuthorService#deleteAnnouncementsByAuthorId(int)} for deleting
+     * This method takes an ID from the client to
+     * deleteAnnouncementsByAuthorId a specific author id and passes it to
+     * {@link AuthorService#deleteAnnouncementsByAuthorId(int)} for deleting.
      *
-     * @param id int
+     * @param id int.
      */
     @DeleteMapping(value = "/authors/{id}/delete-announcements-by-author-id")
-    public void deleteAnnouncementsByAuthorId(@PathVariable("id") int id) {
+    public void deleteAnnouncementsByAuthorId(
+            @PathVariable("id") final int id) {
         authorService.deleteAnnouncementsByAuthorId(id);
     }
 }

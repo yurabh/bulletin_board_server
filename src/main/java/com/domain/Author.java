@@ -2,31 +2,52 @@ package com.domain;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import javax.persistence.*;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import java.util.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * Class {@link Author} with parameters id,version,name,
- * {@link Phone} ,
+ * This is class {@link Author} with parameters id,version,name,
+ * {@link Phone},
  * {@link Email},
- * {@link Address},
+ * {@link Address}.
  *
- * @author Yuriy Bahlay
- * @version 1.1
+ * @author Yuriy Bahlay.
+ * @version 1.1.
  */
 
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@EqualsAndHashCode
+@JsonIdentityInfo(generator = ObjectIdGenerators.
+        PropertyGenerator.class, property = "id")
 @Table(name = "authors")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Author {
 
 
     /**
-     * Field author id
+     * Field author id.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,246 +56,129 @@ public class Author {
 
 
     /**
-     * Field version is number version of transaction in data base
+     * Field version is number version of transaction in data base.
      */
     @Version
     private int version;
 
 
     /**
-     * Field name of author
+     * Field name of author.
      */
-    @Column(nullable = false)
-    @Size(min = 5, max = 15, message = "The author name must have min 5 or max 15 letters\n")
-    @NotNull
+    @Column(nullable = false, unique = true)
     private String name;
 
 
     /**
-     * Field set phone is phone related to appropriate author {@link Phone}
+     * Field lastName of author.
      */
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE},
-            orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "author")
-    @Valid
+    @Column(nullable = false, unique = true)
+    private String lastName;
+
+
+    /**
+     * Field password of author.
+     */
+    @Column(nullable = false)
+    private String password;
+
+
+    /**
+     * Field active of author.
+     */
+    @Column(nullable = false)
+    private boolean active;
+
+
+    /**
+     * Field set roles related to appropriate author {@link Role}.
+     */
+    @ManyToMany(cascade = CascadeType.REFRESH)
+    @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @EqualsAndHashCode.Exclude
+    private Set<Role> roles = new HashSet<>();
+
+
+    /**
+     * Field set phone is phone related to appropriate author {@link Phone}.
+     */
+    @OneToMany(cascade = {CascadeType.ALL},
+            orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "author")
+    @EqualsAndHashCode.Exclude
     private Set<Phone> phones = new HashSet<>();
 
 
     /**
-     * Field set address is address related to appropriate author {@link Address}
+     * Field set address is address related to appropriate
+     * author {@link Address}.
      */
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE},
-            orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "author")
-    @Valid
+    @OneToMany(cascade = {CascadeType.ALL},
+            orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "author")
+    @EqualsAndHashCode.Exclude
     private Set<Address> addresses = new HashSet<>();
 
 
     /**
-     * Field set email is email related to appropriate author {@link Email}
+     * Field set email is email related to appropriate author {@link Email}.
      */
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE},
-            fetch = FetchType.EAGER, orphanRemoval = true, mappedBy = "author")
-    @Valid
+    @OneToMany(cascade = {CascadeType.ALL},
+            fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "author")
+    @EqualsAndHashCode.Exclude
     private Set<Email> emails = new HashSet<>();
 
 
     /**
-     * This is default constructor without parameters which creates object {@link Author}
-     */
-    public Author() {
-    }
-
-
-    /**
-     * This is a constructor which creates {@link Author} object with parameters
+     * This is a constructor which creates {@link Author}
+     * object with parameters.
      *
-     * @param name String
+     * @param nameAuthor String.
      */
-    public Author(String name) {
-        this.name = name;
+    public Author(final String nameAuthor) {
+        this.name = nameAuthor;
     }
 
 
     /**
-     * <p>This is a simple description of the method getId in the {@link Author} class<p/>
-     * This method doesn't accept any parameters
+     * This is a method for adding a {@link Phone} to a collection
+     * of phones from the author.
      *
-     * @return author id
+     * @param phone {@link Phone}.
      */
-    public int getId() {
-        return id;
-    }
-
-
-    /**
-     * <p>This is a simple description of the method setId in the {@link Author} class<p/>
-     *
-     * @param id int
-     */
-    public void setId(int id) {
-        this.id = id;
-    }
-
-
-    /**
-     * <p>This is a simple description of the method getVersion in the {@link Author} class<p/>
-     * This method doesn't accept any parameters
-     *
-     * @return author version
-     */
-    public int getVersion() {
-        return version;
-    }
-
-
-    /**
-     * <p>This is a simple description of the method setVersion in the {@link Author} class<p/>
-     *
-     * @param version int
-     */
-    public void setVersion(int version) {
-        this.version = version;
-    }
-
-
-    /**
-     * <p>This is a simple description of the method getName in the {@link Author} class<p/>
-     * This method doesn't accept any parameters
-     *
-     * @return author name
-     */
-    public String getName() {
-        return name;
-    }
-
-
-    /**
-     * <p>This is a simple description of the method setName in the {@link Author} class<p/>
-     *
-     * @param name String
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-
-    /**
-     * <p>This is a simple description of the method getPhones related with {@link Author} class<p/>
-     * This method doesn't accept any parameters
-     *
-     * @return phones phone related to author
-     */
-    public Set<Phone> getPhones() {
-        return phones;
-    }
-
-
-    /**
-     * <p>This is a simple description of the method setPhones in the {@link Author} class<p/>
-     *
-     * @param phones phone related to author
-     */
-    public void setPhones(Set<Phone> phones) {
-        this.phones = phones;
-    }
-
-
-    /**
-     * <p>This is a simple description of the method getAddresses related with {@link Author} class<p/>
-     * This method doesn't accept any parameters
-     *
-     * @return addresses address related to author
-     */
-    public Set<Address> getAddresses() {
-        return addresses;
-    }
-
-
-    /**
-     * <p>This is a simple description of the method setAddresses in the {@link Author} class<p/>
-     *
-     * @param addresses address related to author
-     */
-    public void setAddresses(Set<Address> addresses) {
-        this.addresses = addresses;
-    }
-
-
-    /**
-     * <p>This is a simple description of the method getEmails related with {@link Author} class<p/>
-     * This method doesn't accept any parameters
-     *
-     * @return emails email related to author
-     */
-    public Set<Email> getEmails() {
-        return emails;
-    }
-
-
-    /**
-     * <p>This is a simple description of the method setEmails in the {@link Author} class<p/>
-     *
-     * @param emails email related to author
-     */
-    public void setEmails(Set<Email> emails) {
-        this.emails = emails;
-    }
-
-
-    /**
-     * <p>This is a simple description of the method equals(Object o)<p/>
-     * This method checks for equality between two Objects and this method sets an Object object
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Author author = (Author) o;
-        return id == author.id &&
-                version == author.version &&
-                Objects.equals(name, author.name) &&
-                Objects.equals(phones, author.phones) &&
-                Objects.equals(addresses, author.addresses) &&
-                Objects.equals(emails, author.emails);
-    }
-
-
-    /**
-     * <p>This is a simple description of the hashcode method in this class<p/>
-     *
-     * @return hashCode of {@link Author}
-     */
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, version, name, phones, addresses, emails);
-    }
-
-
-    /**
-     * This is a method for adding a {@link Phone} to a collection of phones from the author
-     *
-     * @param phone {@link Phone}
-     */
-    public void addPhone(Phone phone) {
+    public void addPhone(final Phone phone) {
         phones.add(phone);
     }
 
 
     /**
-     * This is a method for adding a {@link Address} to a collection of address from the author
+     * This is a method for adding a {@link Address} to a collection
+     * of address from the author.
      *
-     * @param address {@link Address}
+     * @param address {@link Address}.
      */
-    public void addAddress(Address address) {
+    public void addAddress(final Address address) {
         addresses.add(address);
     }
 
 
     /**
-     * This is a method for adding a {@link Email} to a collection of emails from the author
+     * This is a method for adding a {@link Email} to a collection
+     * of emails from the author.
      *
-     * @param email {@link Email}
+     * @param email {@link Email}.
      */
-    public void addEmail(Email email) {
+    public void addEmail(final Email email) {
         emails.add(email);
+    }
+
+
+    /**
+     * This is a method for adding a {@link Role} to a collection
+     * of roles from the author.
+     *
+     * @param role {@link Role}.
+     */
+    public void addRole(final Role role) {
+        roles.add(role);
     }
 }

@@ -1,14 +1,20 @@
 package com.controller;
 
 import com.config.ConfigAppTest;
-import com.domain.Heading;
+import com.dto.HeadingDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.exception.handler.CustomExceptionHandler;
 import com.service.HeadingService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -18,13 +24,16 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 
+import javax.validation.Validator;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * This is class for testing {@link HeadingController} class and its controllers
+ * This is class for testing {@link HeadingController}
+ * class and its controllers.
  */
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -34,96 +43,117 @@ public class HeadingControllerTest {
 
 
     /**
-     * This is mock field {@link HeadingService}
+     * This is mock field {@link HeadingService}.
      */
     @Mock
     private HeadingService headingService;
 
 
     /**
-     * This is field {@link HeadingController}
+     * This is field {@link HeadingController}.
      */
     @InjectMocks
     private HeadingController headingController;
 
 
     /**
-     * This is field {@link MockMvc}
+     * This is field {@link MockMvc}.
      */
     private MockMvc mockMvc;
 
 
     /**
-     * This is method which configure and build {@link MockMvc} object
+     * This is field {@link Validator} it is used for validation data
+     * when test some {@link HeadingController} and inject it thought
+     * {@link HeadingController#setValidator(Validator)}.
+     */
+    @Autowired
+    private Validator validator;
+
+
+    /**
+     * This is method which configure and build {@link MockMvc} object.
      */
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-
-        mockMvc = MockMvcBuilders.standaloneSetup(headingController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(headingController)
+                .setControllerAdvice(new CustomExceptionHandler())
+                .build();
+        headingController.setValidator(validator);
     }
 
 
     /**
-     * This is test method for testing {@link HeadingController#save(Heading)} method
+     * This is test method for testing
+     * {@link HeadingController#save(HeadingDto)} method.
      *
-     * @throws Exception can throw
+     * @throws Exception can throw.
      */
     @Test
     public void shouldSaveHeadingWithoutThrowingException() throws Exception {
-        Mockito.doNothing().when(headingService).save(ArgumentMatchers.any(Heading.class));
+        Mockito.doNothing()
+                .when(headingService)
+                .save(ArgumentMatchers.any(HeadingDto.class));
 
-        String json = new ObjectMapper().writeValueAsString(new Heading("CarVolvo"));
+        String json = new ObjectMapper()
+                .writeValueAsString(new HeadingDto(0, 0, "CarVolvo"));
 
         mockMvc.perform(post("/heading/headings")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(json))
                 .andDo(print())
-                .andExpect(status().is(200));
+                .andExpect(status().isOk());
     }
 
 
     /**
-     * This is test method for testing {@link HeadingController#save(Heading)} method with throwing exception
+     * This is test method for testing
+     * {@link HeadingController#save(HeadingDto)}
+     * method with throwing exception.
      *
-     * @throws Exception can throw
+     * @throws Exception can throw.
      */
     @Test
     public void shouldSaveHeadingWithThrowingException() throws Exception {
 
         Mockito.doThrow(IllegalArgumentException.class).when(headingService)
-                .save(ArgumentMatchers.any(Heading.class));
+                .save(ArgumentMatchers.any(HeadingDto.class));
 
-        String json = new ObjectMapper().writeValueAsString(new Heading("Car"));
+        String json = new ObjectMapper()
+                .writeValueAsString(new HeadingDto(0, 0, "Car"));
 
         MvcResult result = mockMvc.perform(post("/heading/headings")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(json))
                 .andDo(print())
-                .andExpect(status().is(406))
+                .andExpect(status().isNotAcceptable())
                 .andReturn();
 
         String content = result.getResponse().getContentAsString();
 
-        Assert.assertTrue(content.contains("A heading name must have min 5 or max 100 letters"));
+        Assert.assertTrue(content
+                .contains("A heading name must have min 5 or max 100 letters"));
     }
 
 
     /**
-     * This is test method for testing {@link HeadingController#get(int)} method
+     * This is test method for testing {@link HeadingController#get(int)}
+     * method.
      *
-     * @throws Exception can throw
+     * @throws Exception can throw.
      */
     @Test
     public void shouldFindHeading() throws Exception {
 
-        Heading car = new Heading("Car444");
+        HeadingDto car = new HeadingDto(0, 0, "Car444");
 
-        Mockito.doReturn(car).when(headingService).find(ArgumentMatchers.anyInt());
+        Mockito.doReturn(car).when(headingService)
+                .find(ArgumentMatchers.anyInt());
 
         mockMvc.perform(get("/heading/headings/{id}", 1))
                 .andDo(print())
-                .andExpect(status().is(302))
+                .andExpect(status().isFound())
                 .andExpect(jsonPath("id").value(0))
                 .andExpect(jsonPath("version").value(0))
                 .andExpect(jsonPath("name").value("Car444"))
@@ -132,96 +162,111 @@ public class HeadingControllerTest {
 
 
     /**
-     * This is test method for testing {@link HeadingController#get(int)} method
+     * This is test method for testing {@link HeadingController#get(int)}
+     * method with throwing exception.
      *
-     * @throws Exception can throw
+     * @throws Exception can throw.
      */
     @Test
     public void shouldFindHeadingThrowingException() throws Exception {
 
-        Mockito.doReturn(null).when(headingService).find(ArgumentMatchers.anyInt());
+        Mockito.doReturn(null).when(headingService)
+                .find(ArgumentMatchers.anyInt());
 
         mockMvc.perform(get("/heading/headings/{id}", 1))
                 .andDo(print())
-                .andExpect(status().is(204))
+                .andExpect(status().isNoContent())
                 .andReturn();
     }
 
 
     /**
-     * This is test method for testing {@link HeadingController#update(Heading)} method
+     * This is test method for testing
+     * {@link HeadingController#update(HeadingDto)}
+     * method.
      *
-     * @throws Exception can throw
+     * @throws Exception can throw.
      */
     @Test
     public void shouldUpdateHeading() throws Exception {
 
-        Mockito.doNothing().when(headingService).update(ArgumentMatchers.any(Heading.class));
+        Mockito.doNothing().when(headingService)
+                .update(ArgumentMatchers.any(HeadingDto.class));
 
-        String json = new ObjectMapper().writeValueAsString(new Heading("CarMercedes"));
+        String json = new ObjectMapper()
+                .writeValueAsString(new HeadingDto(0, 0, "CarMercedes"));
 
         mockMvc.perform(put("/heading/headings")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(json))
                 .andDo(print())
-                .andExpect(status().is(200));
+                .andExpect(status().isOk());
     }
 
 
     /**
-     * This is test method for testing {@link HeadingController#update(Heading)} with exception method
+     * This is test method for testing
+     * {@link HeadingController#update(HeadingDto)}
+     * with exception method.
      *
-     * @throws Exception can throw
+     * @throws Exception can throw.
      */
     @Test
     public void shouldUpdateHeadingWithException() throws Exception {
 
         Mockito.doThrow(IllegalArgumentException.class).when(headingService)
-                .update(ArgumentMatchers.any(Heading.class));
+                .update(ArgumentMatchers.any(HeadingDto.class));
 
-        String json = new ObjectMapper().writeValueAsString(new Heading("Car"));
+        String json = new ObjectMapper()
+                .writeValueAsString(new HeadingDto(0, 0, "Car"));
 
         MvcResult result = mockMvc.perform(put("/heading/headings")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(json))
                 .andDo(print())
-                .andExpect(status().is(406))
+                .andExpect(status().isNotAcceptable())
                 .andReturn();
 
         String content = result.getResponse().getContentAsString();
 
-        Assert.assertTrue(content.contains("A heading name must have min 5 or max 100 letters"));
+        Assert.assertTrue(content
+                .contains("A heading name must have min 5 or max 100 letters"));
     }
 
 
     /**
-     * This is test method for testing {@link HeadingController#delete(int)} method
+     * This is test method for testing
+     * {@link HeadingController#delete(int)}
+     * method.
      *
-     * @throws Exception can throw
+     * @throws Exception can throw.
      */
     @Test
     public void shouldDeleteHeading() throws Exception {
 
-        Mockito.doNothing().when(headingService).delete(ArgumentMatchers.anyInt());
+        Mockito.doNothing().when(headingService).
+                delete(ArgumentMatchers.anyInt());
 
         mockMvc.perform(delete("/heading/headings/{id}", 1))
                 .andDo(print())
-                .andExpect(status().is(200));
+                .andExpect(status().isOk());
     }
 
 
     /**
-     * This is test method for testing {@link HeadingController#deleteHeadingById(int)} method
+     * This is test method for testing
+     * {@link HeadingController#deleteHeadingById(int)} method.
      *
-     * @throws Exception can throw
+     * @throws Exception can throw.
      */
     @Test
     public void shouldDeleteHeadingById() throws Exception {
 
-        Mockito.doNothing().when(headingService).deleteHeading(ArgumentMatchers.anyInt());
+        Mockito.doNothing().when(headingService).
+                deleteHeading(ArgumentMatchers.anyInt());
 
         mockMvc.perform(delete("/heading/headings/{id}/delete-by-id", 1))
                 .andDo(print())
-                .andExpect(status().is(200));
+                .andExpect(status().isOk());
     }
 }

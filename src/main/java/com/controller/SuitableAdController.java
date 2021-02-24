@@ -1,24 +1,33 @@
 package com.controller;
 
-import com.domain.SuitableAd;
-import com.exception.SuitableAdFindException;
-import com.exception.SuitableAdSaveException;
-import com.exception.SuitableAdUpdateException;
+import com.constant.ExceptionConstant;
+import com.constant.LoggerConstants;
+import com.dto.SuitableAdDto;
+import com.exception.custom_exception.SuitableAdException;
+
 import com.service.CRUDService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.*;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validator;
 import java.util.Set;
 
 /**
- * Class {@link SuitableAdController} using to perform suitableAd methods for user implementation
+ * Class {@link SuitableAdController} using to perform suitableAd methods
+ * for user implementation.
  *
- * @author Yuriy Bahlay
- * @version 1.1
+ * @author Yuriy Bahlay.
+ * @version 1.1.
  */
 
 @RestController
@@ -27,136 +36,128 @@ public class SuitableAdController {
 
 
     /**
-     * This is field of class {@link Logger} returns a logger for this controller
+     * This is field of class {@link Logger} returns
+     * a logger for this controller.
      */
-    private static final Logger LOGGER = Logger.getLogger(SuitableAdController.class);
+    private static final Logger LOGGER = Logger
+            .getLogger(SuitableAdController.class);
 
 
     /**
      * Field {@link CRUDService} is object instance of {@link CRUDService}
-     * interface with {@link SuitableAd} type
-     * It connects realization part with user application
+     * interface with {@link SuitableAdDto} type it connects realization part
+     * with user application.
      */
-    private CRUDService<SuitableAd> suitableAdService;
+    private final CRUDService<SuitableAdDto> suitableAdService;
 
 
     /**
-     * This static field use for validation bean instances.This is object instance of {@link Validator}
+     * This field use for validation bean instances.
+     * This is object instance of {@link Validator}.
      */
-    private static Validator validator;
+    private Validator validator;
 
 
     /**
-     * This is a static block.It use for is the entry point for Jakarta Bean @Validation
-     * and Builds and returns a {@link ValidatorFactory} instance based on the default
-     * Jakarta Bean Validation provider and following the XML configuration
-     */
-    static {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
-    }
-
-
-    /**
-     * This is a constructor that injects object gain of the {@link CRUDService} and
-     * injects it into the {@link SuitableAdController} class
+     * This is a constructor that injects object gain of the {@link CRUDService}
+     * and injects it into the {@link SuitableAdController} class.
      *
-     * @param suitableAdService {@link CRUDService}
+     * @param serviceSuitableAdDto {@link CRUDService}.
      */
     @Autowired
-    public SuitableAdController(CRUDService<SuitableAd> suitableAdService) {
-        this.suitableAdService = suitableAdService;
+    public SuitableAdController(final CRUDService<SuitableAdDto>
+                                        serviceSuitableAdDto) {
+        this.suitableAdService = serviceSuitableAdDto;
     }
 
 
     /**
-     * This is a method that takes a suitableAd object from client and passes it to the
-     * {@link CRUDService#save(Object)} method save
+     * This is method for injecting {@link Validator}.
+     * It'll injects class {@link Validator}
+     * in controllers such as:
+     * {@link SuitableAdController}
+     * and SuitableAdControllerTest for test cases.
      *
-     * @param suitableAd {@link SuitableAd}
+     * @param validatorSuitableAd {@link Validator}.
+     */
+    @Autowired
+    public void setValidator(final Validator validatorSuitableAd) {
+        this.validator = validatorSuitableAd;
+    }
+
+
+    /**
+     * This is a method that takes a suitableAdDto object from client and passes
+     * it to the {@link CRUDService#save(Object)} method save.
+     *
+     * @param suitableAdDto {@link SuitableAdDto}.
+     * @throws ConstraintViolationException if suitableAd could'nt save.
      */
     @PostMapping(value = "/suitable-ads")
-    public void save(@RequestBody SuitableAd suitableAd) {
-        Set<ConstraintViolation<SuitableAd>> violations = validator.validate(suitableAd);
-        if (violations.size() > 0) {
+    public void save(@RequestBody final SuitableAdDto suitableAdDto) {
+        Set<ConstraintViolation<SuitableAdDto>> violations = validator.
+                validate(suitableAdDto);
+        if (!violations.isEmpty()) {
+            LOGGER.error(violations.toString());
             throw new ConstraintViolationException(violations);
         }
-        suitableAdService.save(suitableAd);
-        LOGGER.info("SuitableAd saved");
+        suitableAdService.save(suitableAdDto);
+        LOGGER.info(LoggerConstants.SUITABLE_AD_SAVED);
     }
 
 
     /**
-     * This handler only intercepts the exception in the case of an exception in the method
-     * {@link SuitableAdController#save(SuitableAd)}
+     * This method returns to the client a certain suitableAdDto on a certain
+     * identifier suitableAdDto and passes the id to the
+     * {@link CRUDService#find(int)} for finding.
      *
-     * @param e exception {@link ConstraintViolationException}
-     * @return {@link ResponseEntity} with error message and error status
-     */
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<String> throwExceptionSuitableAdSave(ConstraintViolationException e) {
-        LOGGER.error(e.getMessage());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
-    }
-
-
-    /**
-     * This method returns to the client a certain suitableAd on a certain identifier suitableAd and passes the
-     * id to the {@link CRUDService#find(int)} for finding
-     *
-     * @param id int suitableAd id
-     * @return suitableAd {@link SuitableAd}
-     * @throws SuitableAdFindException if suitableAd could'nt find
+     * @param id int suitableAdDto id.
+     * @return suitableAdDto {@link SuitableAdDto}.
+     * @throws SuitableAdException if suitableAd could'nt find.
      */
     @GetMapping(value = "/suitable-ads/{id}")
-    public SuitableAd get(@PathVariable("id") int id) throws SuitableAdFindException {
-        SuitableAd suitableAd = suitableAdService.find(id);
-        if (suitableAd == null) {
-            throw new SuitableAdFindException("Cannot find SuitableAd by id: " + id);
+    public SuitableAdDto get(
+            @PathVariable("id") final int id) throws SuitableAdException {
+        SuitableAdDto suitableAdDto = suitableAdService.find(id);
+        if (suitableAdDto == null) {
+            LOGGER.error(LoggerConstants.SUITABLE_AD_NOT_FIND + id);
+            throw new SuitableAdException(
+                    ExceptionConstant.SUITABLE_AD_GET_EXCEPTION + id);
         }
-        LOGGER.info("SuitableAd found");
-        return suitableAd;
+        LOGGER.info(LoggerConstants.SUITABLE_AD_FOUND);
+        return suitableAdDto;
     }
 
 
     /**
-     * This handler only intercepts the exception in the case of an exception in the method
-     * {@link SuitableAdController#get(int)}
+     * This method takes a suitableAdDto object with some id
+     * from the client and passes it in {@link CRUDService#update(Object)}
+     * for updating.
      *
-     * @param e exception {@link SuitableAdFindException}
-     * @return {@link ResponseEntity} with error message and error status
-     */
-    @ExceptionHandler(SuitableAdFindException.class)
-    public ResponseEntity<String> throwExceptionSuitableAdFind(SuitableAdFindException e) {
-        LOGGER.error("Cannot find SuitableAd by id: " + e.getMessage());
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.NO_CONTENT);
-    }
-
-
-    /**
-     * This method takes a suitableAd object with some id from the client and passes it in
-     * {@link CRUDService#update(Object)} for updating
-     *
-     * @param suitableAd {@link SuitableAd} with new parameters for setting up
+     * @param suitableAdDto {@link SuitableAdDto} with new parameters
+     *                      for setting up.
+     * @throws ConstraintViolationException if suitableAd could'nt update.
      */
     @PutMapping(value = "/suitable-ads")
-    public void update(@RequestBody SuitableAd suitableAd) {
-        Set<ConstraintViolation<SuitableAd>> violations = validator.validate(suitableAd);
-        if (violations.size() > 0) {
+    public void update(@RequestBody final SuitableAdDto suitableAdDto) {
+        Set<ConstraintViolation<SuitableAdDto>> violations = validator
+                .validate(suitableAdDto);
+        if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
-        suitableAdService.update(suitableAd);
-        LOGGER.info("SuitableAd updated");
+        suitableAdService.update(suitableAdDto);
+        LOGGER.info(LoggerConstants.SUITABLE_AD_UPDATE);
     }
 
+
     /**
-     * This method takes an ID from the client to delete a specific suitableAd and passes it to
-     * {@link CRUDService#delete(int)} for deleting
+     * This method takes an ID from the client to delete a specific suitableAd
+     * and passes it to {@link CRUDService#delete(int)} for deleting.
      *
-     * @param id int
+     * @param id int.
      */
     @DeleteMapping(value = "/suitable-ads/{id}")
-    public void delete(@PathVariable("id") int id) {
+    public void delete(@PathVariable("id") final int id) {
         suitableAdService.delete(id);
     }
 }
