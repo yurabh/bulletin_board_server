@@ -7,6 +7,9 @@ import org.springframework.stereotype.Repository;
 /**
  * This is {@link RoleRepository} interface it helps us
  * to access to database.
+ *
+ * @author Yuriy Bahlay.
+ * @version 1.1.
  */
 
 @Repository
