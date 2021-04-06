@@ -2,6 +2,9 @@ package com.constant;
 
 /**
  * This class contains Logger Constant.
+ *
+ * @author Yuriy Bahlay.
+ * @version 1.1.
  */
 
 public final class LoggerConstants {

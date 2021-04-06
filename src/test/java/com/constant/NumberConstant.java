@@ -2,7 +2,11 @@ package com.constant;
 
 /**
  * This is NumberConstant class.
+ *
+ * @author Yuriy Bahlay.
+ * @version 1.1.
  */
+
 public final class NumberConstant {
 
     /**
@@ -27,7 +31,7 @@ public final class NumberConstant {
     public static final int FIVE_NUMBER = 5;
 
     /**
-     * This is constant ONE_HUNDRED.
+     * This is constant ONE_THOUSAND.
      */
     public static final double ONE_HUNDRED = 1000.00;
 

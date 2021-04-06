@@ -2,6 +2,9 @@ package com.constant;
 
 /**
  * This class contains ValidationConstant.
+ *
+ * @author Yuriy Bahlay.
+ * @version 1.1.
  */
 
 public final class ValidationConstants {
