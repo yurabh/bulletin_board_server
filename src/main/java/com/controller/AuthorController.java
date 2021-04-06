@@ -117,6 +117,20 @@ public class AuthorController {
 
 
     /**
+     * This is method which's pass {@link AuthorDto} to the service
+     * layer and there generate token and pass it to the client.
+     *
+     * @param authorDto {@link AuthorDto}.
+     * @return responseEntity {@link ResponseEntity}.
+     */
+    @PostMapping(value = "/authentication")
+    public ResponseEntity<String> authentication(
+            @RequestBody final AuthorDto authorDto) {
+        return ResponseEntity.ok(authorService.authentication(authorDto));
+    }
+
+
+    /**
      * This method returns to the client a certain authorDto on a certain
      * identifier author and passes the id to the
      * {@link AuthorService#find(int)} for finding.

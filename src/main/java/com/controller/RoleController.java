@@ -46,19 +46,30 @@ public class RoleController {
      * This field use for validation bean instances.
      * This is object instance of {@link Validator}.
      */
-    private final Validator validator;
+    private Validator validator;
 
     /**
      * This is a constructor that injects object gain of the
      * {@link RoleService} into the {@link RoleController} class.
      *
-     * @param serviceRole   {@link RoleService}.
+     * @param serviceRole {@link RoleService}.
+     */
+    @Autowired
+    public RoleController(final RoleService serviceRole) {
+        this.roleService = serviceRole;
+    }
+
+    /**
+     * This is method for injecting {@link Validator}.
+     * It'll injects class {@link Validator}
+     * in controllers such as:
+     * {@link RoleController}
+     * and RoleControllerTest for test cases.
+     *
      * @param validatorRole {@link Validator}.
      */
     @Autowired
-    public RoleController(final RoleService serviceRole,
-                          final Validator validatorRole) {
-        this.roleService = serviceRole;
+    public void setValidator(final Validator validatorRole) {
         this.validator = validatorRole;
     }
 

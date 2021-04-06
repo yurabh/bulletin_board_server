@@ -95,7 +95,7 @@ public class AnnouncementDaoImpl implements AnnouncementDao {
     @Override
     public void save(final Announcement announcement) {
         entityManager.persist(announcement);
-//        emailServiceImpl.searchEmailsForSendingEmail(announcement);
+        emailServiceImpl.searchEmailsForSendingEmail(announcement);
     }
 
 

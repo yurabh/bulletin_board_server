@@ -5,6 +5,9 @@ package com.domain.enums;
  * USER,
  * ADMIN,
  * MODERATOR.
+ *
+ * @author Yuriy Bahlay.
+ * @version 1.1.
  */
 public enum ROLE {
 

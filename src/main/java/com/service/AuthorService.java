@@ -20,4 +20,13 @@ public interface AuthorService extends CRUDService<AuthorDto> {
      * @param id int
      */
     void deleteAnnouncementsByAuthorId(int id);
+
+    /**
+     * This is method for authentication author and generate
+     * token nd send it to the client.
+     *
+     * @param authorDto {@link AuthorDto}.
+     * @return string {@link String}.
+     */
+    String authentication(AuthorDto authorDto);
 }

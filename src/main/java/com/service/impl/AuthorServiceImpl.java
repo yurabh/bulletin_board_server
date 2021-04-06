@@ -6,6 +6,7 @@ import com.domain.Author;
 import com.dto.AuthorDto;
 
 import com.repository.AuthorRepository;
+import com.security.jwt.JwtProvider;
 import com.service.AuthorService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,7 @@ public class AuthorServiceImpl implements AuthorService {
      * This is field {@link BCryptPasswordEncoder} for encoding
      * password.
      */
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
 
 
     /**
@@ -50,6 +51,12 @@ public class AuthorServiceImpl implements AuthorService {
      * to author repository.
      */
     private final AuthorRepository authorRepository;
+
+
+    /**
+     * This is field {@link JwtProvider} for working with Jwt.
+     */
+    private final JwtProvider jwtProvider;
 
 
     /**
@@ -61,16 +68,19 @@ public class AuthorServiceImpl implements AuthorService {
      * @param mapperModel      {@link ModelMapper}.
      * @param encoder          {@link BCryptPasswordEncoder}.
      * @param repositoryAuthor {@link AuthorRepository}.
+     * @param providerJwt      {@link JwtProvider}.
      */
     @Autowired
     public AuthorServiceImpl(final AuthorDao daoAuthor,
                              final ModelMapper mapperModel,
                              final BCryptPasswordEncoder encoder,
-                             final AuthorRepository repositoryAuthor) {
+                             final AuthorRepository repositoryAuthor,
+                             final JwtProvider providerJwt) {
         this.authorDao = daoAuthor;
         this.modelMapper = mapperModel;
-        this.bCryptPasswordEncoder = encoder;
+        this.passwordEncoder = encoder;
         this.authorRepository = repositoryAuthor;
+        this.jwtProvider = providerJwt;
     }
 
 
@@ -83,9 +93,23 @@ public class AuthorServiceImpl implements AuthorService {
     @Override
     public void save(final AuthorDto authorDto) {
         final Author mappedToAuthor = modelMapper.map(authorDto, Author.class);
-        mappedToAuthor.setPassword(bCryptPasswordEncoder.
+        mappedToAuthor.setPassword(passwordEncoder.
                 encode(authorDto.getPassword()));
         authorDao.save(mappedToAuthor);
+    }
+
+
+    /**
+     * This is method which is take {@link AuthorDto} object and
+     * generate token and return it to the controller layer.
+     *
+     * @param authorDto {@link AuthorDto}.
+     * @return string {@link String}.
+     */
+    @Override
+    public String authentication(final AuthorDto authorDto) {
+        final Author author = modelMapper.map(authorDto, Author.class);
+        return jwtProvider.generateToken(author.getName());
     }
 
 
@@ -99,12 +123,11 @@ public class AuthorServiceImpl implements AuthorService {
      */
     @Override
     public AuthorDto find(final int id) {
-        final AuthorDto authorDto = modelMapper
-                .map(authorDao.find(id), AuthorDto.class);
-        if (authorDto == null) {
+        final Author author = authorDao.find(id);
+        if (author == null) {
             return null;
         }
-        return authorDto;
+        return modelMapper.map(author, AuthorDto.class);
     }
 
 
