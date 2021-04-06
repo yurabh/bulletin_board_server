@@ -1,6 +1,7 @@
 package com.config;
 
-import com.security.MyBasicAuthenticationEntryPoint;
+import com.security.jwt.JwtAuthenticationEntryPoint;
+import com.security.jwt.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +18,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static com.constant.ValidationConstants.ADMIN;
 import static com.constant.ValidationConstants.MODERATOR;
@@ -25,6 +27,9 @@ import static com.constant.ValidationConstants.USER;
 /**
  * This class {@link SecurityConfig}
  * which provides a security configuration.
+ *
+ * @author Yuriy Bahlay.
+ * @version 1.1.
  */
 
 @Configuration
@@ -37,13 +42,24 @@ import static com.constant.ValidationConstants.USER;
 public class SecurityConfig
         extends WebSecurityConfigurerAdapter {
 
+    /**
+     * This is field {@link JwtAuthenticationEntryPoint},
+     * it helps gives some information to users when token
+     * is wrong.
+     */
+    private final JwtAuthenticationEntryPoint entryPoint;
+
+    /**
+     * This is field {@link JwtFilter}.
+     * We use it perform work with Jwt token.
+     */
+    private final JwtFilter filter;
 
     /**
      * This is field {@link BCryptPasswordEncoder} it helps
      * to encryption data.
      */
     private final BCryptPasswordEncoder encoder;
-
 
     /**
      * This is field {@link org.springframework
@@ -53,33 +69,30 @@ public class SecurityConfig
     private final UserDetailsService userDetailsService;
 
 
-//    /**
-//     * This is field {@link MyBasicAuthenticationEntryPoint} for
-//     * create basic authentication entry points.
-//     */
-//    private MyBasicAuthenticationEntryPoint authenticationEntryPoint;
-
-
     /**
      * This is constructor {@link SecurityConfig}.
      * It injects two classes such as:
-     * {@link BCryptPasswordEncoder}
-     * {@link UserDetailsService}.
-     * {@link MyBasicAuthenticationEntryPoint}.
+     * {@link BCryptPasswordEncoder},
+     * {@link UserDetailsService},
+     * {@link JwtAuthenticationEntryPoint},
+     * {@link JwtFilter}.
      *
-     * @param encoderPassword {@link BCryptPasswordEncoder}.
-     * @param userDetails     {@link UserDetailsService}.
-     *                        ?@param authenticationEntryPoints {@link MyBasicAuthenticationEntryPoint}.
+     * @param encoderPassword          {@link BCryptPasswordEncoder}.
+     * @param userDetails              {@link UserDetailsService}.
+     * @param entryPointAuthentication {@link JwtAuthenticationEntryPoint}.
+     * @param filterJwt                {@link JwtFilter}.
      */
     @Autowired
     public SecurityConfig(final BCryptPasswordEncoder encoderPassword,
                           @Qualifier("myUserDetailsService") final
-                          UserDetailsService userDetails /* ,
-                         final MyBasicAuthenticationEntryPoint
-                                  authenticationEntryPoints*/) {
+                          UserDetailsService userDetails,
+                          final JwtAuthenticationEntryPoint
+                                  entryPointAuthentication,
+                          final JwtFilter filterJwt) {
         this.encoder = encoderPassword;
         this.userDetailsService = userDetails;
-//        this.authenticationEntryPoint = authenticationEntryPoints;
+        this.entryPoint = entryPointAuthentication;
+        this.filter = filterJwt;
     }
 
 
@@ -93,12 +106,18 @@ public class SecurityConfig
     @Override
     protected void configure(final AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(authProvider());
-//        auth.userDetailsService(userDetailsService)
-//                .passwordEncoder(encoder);
-
     }
 
 
+    /**
+     * This is method which set's encoder and userDetailService
+     * into daoAuthenticationProvider and further use it in
+     * configure method in this class for setting
+     * AuthenticationManagerBuilder.
+     *
+     * @return daoAuthenticationProvider
+     * {@link DaoAuthenticationProvider}.
+     */
     @Bean
     public DaoAuthenticationProvider authProvider() {
         DaoAuthenticationProvider authProvider =
@@ -106,7 +125,6 @@ public class SecurityConfig
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(encoder);
         return authProvider;
-
     }
 
 
@@ -120,8 +138,7 @@ public class SecurityConfig
      */
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
-        http
-                .cors()
+        http.cors()
                 .and()
                 .csrf()
                 .disable()
@@ -129,10 +146,12 @@ public class SecurityConfig
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .httpBasic()
-//                .authenticationEntryPoint(authenticationEntryPoint)
+                .authenticationEntryPoint(entryPoint)
                 .and()
                 .authorizeRequests()
                 .antMatchers("/myapp/author/authors")
+                .permitAll()
+                .antMatchers("myapp/author/authentication")
                 .permitAll()
                 .antMatchers("/myapp/login*")
                 .permitAll()
@@ -178,5 +197,8 @@ public class SecurityConfig
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll();
+
+        http.addFilterBefore(filter,
+                UsernamePasswordAuthenticationFilter.class);
     }
 }

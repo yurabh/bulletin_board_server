@@ -40,7 +40,8 @@ import javax.sql.DataSource;
         "com.dao",
         "com.controller",
         "com.mapper",
-        "com.exception.handler"})
+        "com.exception.handler",
+        "com.security.jwt"})
 @EnableWebMvc
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableTransactionManagement
@@ -48,7 +49,8 @@ import javax.sql.DataSource;
 @Import({ModelMapperConfig.class,
         EmailConfig.class,
         ScheduleConfig.class,
-        ValidatorConfig.class})
+        ValidatorConfig.class,
+        EncoderConfig.class})
 @PropertySource("classpath:db.properties")
 public class ConfigApp implements WebMvcConfigurer, EnvironmentAware {
 
