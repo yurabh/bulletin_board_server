@@ -11,6 +11,9 @@ import javax.validation.constraints.NotNull;
  * This is {@link SuitableAdToSuitableAdDtoMapper}
  * that helper for mapping from {@link com.domain.SuitableAd}
  * to {@link com.dto.SuitableAdDto} object.
+ *
+ * @author Yuriy Bahlay.
+ * @version 1.1.
  */
 
 @Component

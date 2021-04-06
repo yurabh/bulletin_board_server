@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 /**
  * This is {@link AnnouncementMapper} that helper for mapping
  * from {@link Announcement} to {@link AnnouncementDto} object.
+ *
+ * @author Yuriy Bahlay.
+ * @version 1.1.
  */
 
 @Component
