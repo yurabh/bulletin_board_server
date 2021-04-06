@@ -32,6 +32,9 @@ import java.util.List;
 /**
  * This is a class for testing the class of the
  * {@link AnnouncementService} and its methods.
+ *
+ * @author Yuriy Bahlay.
+ * @version 1.1.
  */
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -150,11 +153,7 @@ public class AnnouncementServiceTest {
         final HeadingDto headingDto = modelMapper
                 .map(heading, HeadingDto.class);
 
-        try {
-            headingService.save(headingDto);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        headingService.save(headingDto);
 
         announcement.setHeading(heading);
 
@@ -166,11 +165,7 @@ public class AnnouncementServiceTest {
 
         announcementDto.setHeading(heading);
 
-        try {
-            announcementService.save(announcementDto);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        announcementService.save(announcementDto);
 
         announcementDto.setId(1);
 
@@ -209,11 +204,7 @@ public class AnnouncementServiceTest {
 
         announcementDto.setName("Update");
 
-        try {
-            announcementService.update(announcementDto);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        announcementService.update(announcementDto);
 
         announcementDto.setVersion(1);
 
@@ -366,11 +357,7 @@ public class AnnouncementServiceTest {
         final HeadingDto headingDto = modelMapper
                 .map(headingOne, HeadingDto.class);
 
-        try {
-            headingService.save(headingDto);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        headingService.save(headingDto);
 
         BigDecimal serviceCost = new BigDecimal(
                 NumberConstant.THREE_HUNDRED_AND_ELEVEN_NUMBER)
@@ -393,17 +380,9 @@ public class AnnouncementServiceTest {
         final AnnouncementDto announcementDtoTwo = modelMapper
                 .map(announcementTwo, AnnouncementDto.class);
 
-        try {
-            announcementService.save(announcementDtoOne);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        announcementService.save(announcementDtoOne);
 
-        try {
-            announcementService.save(announcementDtoTwo);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        announcementService.save(announcementDtoTwo);
 
         announcementDtoOne.setId(NumberConstant.FOUR);
 
@@ -447,13 +426,9 @@ public class AnnouncementServiceTest {
                 "kolonaTwo", false, LocalDate.now(),
                 "I wonna go", serviceCost, author.getId(), heading);
 
-        try {
-            announcementService.save(announcementOne);
+        announcementService.save(announcementOne);
 
-            announcementService.save(announcementTwo);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        announcementService.save(announcementTwo);
 
         ArrayList<AnnouncementDto> announcementsDto = new ArrayList<>();
 

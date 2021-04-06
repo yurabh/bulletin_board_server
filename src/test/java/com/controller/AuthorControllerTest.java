@@ -187,7 +187,8 @@ public class AuthorControllerTest {
                 .andExpect(jsonPath("addresses[0].addressAuthor")
                         .value("antonuca"))
                 .andExpect(jsonPath("roles[0].id").value(1))
-                .andExpect(jsonPath("roles[0].roleAccount").value("User"))
+                .andExpect(jsonPath("roles[0].roleAccount")
+                        .value("ROLE_USER"))
                 .andReturn();
     }
 

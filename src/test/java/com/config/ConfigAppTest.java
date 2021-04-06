@@ -39,14 +39,19 @@ import javax.sql.DataSource;
         "com.dao",
         "com.controller",
         "com.exception.handler",
-        "com.mapper"})
+        "com.mapper",
+        "com.security"})
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableTransactionManagement
 @EnableJpaRepositories(
         basePackages = "com.repository")
-@Import({EmailConfig.class, ModelMapperConfig.class, ValidatorConfig.class})
+@Import({EmailConfig.class,
+        ModelMapperConfig.class,
+        ValidatorConfig.class,
+        EncoderConfig.class})
 @PropertySource("classpath:db.properties")
-public class ConfigAppTest implements WebMvcConfigurer, EnvironmentAware {
+public class ConfigAppTest implements
+        WebMvcConfigurer, EnvironmentAware {
 
 
     /**

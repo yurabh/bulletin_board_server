@@ -33,7 +33,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * This is class for testing {@link HeadingController}
- * class and its controllers.
+ * class and its methods.
+ *
+ * @author Yuriy Bahlay.
+ * @version 1.1.
  */
 
 @RunWith(SpringJUnit4ClassRunner.class)

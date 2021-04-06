@@ -18,6 +18,9 @@ import org.springframework.test.context.web.WebAppConfiguration;
 /**
  * This is a class for testing the class of the
  * {@link HeadingService} and its methods.
+ *
+ * @author Yuriy Bahlay.
+ * @version 1.1.
  */
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -74,11 +77,7 @@ public class HeadingServiceTest {
         headingDto = modelMapper
                 .map(heading, HeadingDto.class);
 
-        try {
-            headingService.save(headingDto);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        headingService.save(headingDto);
 
         headingDto.setId(1);
 

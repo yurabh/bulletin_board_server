@@ -25,6 +25,9 @@ import java.math.RoundingMode;
 /**
  * This is a class for testing the class of the
  * {@link SuitableAdServiceImpl} and its methods.
+ *
+ * @author Yuriy Bahlay.
+ * @version 1.1.
  */
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -107,11 +110,7 @@ public class SuitableAdServiceTest {
         final AuthorDto authorDto = modelMapper
                 .map(author, AuthorDto.class);
 
-        try {
-            authorService.save(authorDto);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        authorService.save(authorDto);
 
         BigDecimal priceFrom = new BigDecimal(NumberConstant.
                 THREE_HUNDRED_AND_ELEVEN_NUMBER).setScale(2, RoundingMode.UP);

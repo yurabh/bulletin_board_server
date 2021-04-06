@@ -46,6 +46,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * This is class for testing {@link AnnouncementController}.
  * class and its controllers.
+ *
+ * @author Yuriy Bahlay.
+ * @version 1.1.
  */
 
 @RunWith(SpringJUnit4ClassRunner.class)
