@@ -2,6 +2,9 @@ package com.exception.custom_exception;
 
 /**
  * This is custom exception {@link RoleException}.
+ *
+ * @author Yuriy Bahlay.
+ * @version 1.1.
  */
 
 public class RoleException extends Exception {

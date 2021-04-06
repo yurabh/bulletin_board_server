@@ -17,22 +17,31 @@ import javax.validation.ConstraintViolationException;
  * some exception handler for {@link com.controller.AnnouncementController}
  * {@link com.controller.SuitableAdController}
  * {@link com.controller.HeadingController}
- * {@link com.controller.AuthorController} classes.
+ * {@link com.controller.AuthorController} classes etc...
  *
  * @author Yuriy Bahlay.
+ * @version 1.1.
  */
 
 @ControllerAdvice
 public class CustomExceptionHandler {
 
+
     /**
      * This handler only intercepts the exception in the case of an exception
-     * in the methods of such as classes
+     * in the methods of such as classes and methods:
      * {@link com.controller.AnnouncementController
-     * #save(com.dto.AnnouncementDto)}
-     * {@link com.controller.AuthorController#save(com.dto.AuthorDto)}
-     * {@link com.controller.HeadingController#save(com.dto.HeadingDto)}
-     * {@link com.controller.SuitableAdController#save(com.dto.SuitableAdDto)}.
+     * #save(com.dto.AnnouncementDto)},
+     * {@link com.controller.AuthorController#save(com.dto.AuthorDto)},
+     * {@link com.controller.HeadingController#save(com.dto.HeadingDto)},
+     * {@link com.controller.SuitableAdController#save(com.dto.SuitableAdDto)},
+     * {@link com.controller.RoleController#saveRole(com.domain.Role)},
+     * {@link com.controller.AnnouncementController
+     * #update(com.dto.AnnouncementDto)},
+     * {@link com.controller.AuthorController#update(com.dto.AuthorDto)},
+     * {@link com.controller.HeadingController#update(com.dto.HeadingDto)},
+     * {@link com.controller.SuitableAdController
+     * #update(com.dto.SuitableAdDto)}.
      *
      * @param e exception {@link ConstraintViolationException}
      * @return {@link ResponseEntity} with error message and error status.
@@ -47,7 +56,16 @@ public class CustomExceptionHandler {
     /**
      * This handler intercepts the exception in the case
      * of an exception in the methods of controllers such as:
-     * for all methods in this controller.
+     * for all methods in this controller like:
+     * {@link com.controller.AnnouncementController#get(int)},
+     * {@link com.controller.AnnouncementController
+     * #getAllAnnouncementByHeadingId(int)},
+     * {@link com.controller.AnnouncementController
+     * #filterAllAnnounceByDate(LocalDate)},
+     * {@link com.controller.AnnouncementController
+     * #filterAllAnnouncementByRevelationTest(String)},
+     * {@link com.controller.AnnouncementController
+     * #getSomeAnnouncementsPagination(int, int)}.
      *
      * @param e {@link AnnouncementException}.
      * @return {@link ResponseEntity} with error message and error status.
@@ -78,6 +96,8 @@ public class CustomExceptionHandler {
      * This handler only intercepts the exception in the case
      * of an exception in the method
      * {@link com.controller.HeadingController#get(int)}.
+     * {@link com.controller.HeadingController
+     * #getAnnouncementsFromHeadings(List)}.
      *
      * @param e exception {@link HeadingException}.
      * @return {@link ResponseEntity} with error message and error status.
@@ -108,6 +128,7 @@ public class CustomExceptionHandler {
      * This handler only intercepts the exception in the case
      * of an exception in the method
      * {@link com.controller.AuthorController#save(com.dto.AuthorDto)}.
+     * {@link com.controller.AuthorController#update(com.dto.AuthorDto)}.
      *
      * @param e exception {@link DuplicateDataException}.
      * @return {@link ResponseEntity} with error message and error status.
