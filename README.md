@@ -26,33 +26,33 @@ the resources package like:
 
 2.2.1 For db.properties you must set the value like:
 
-jdbc.driverClassName=${Value}
-jdbc.url=${Value}
-jdbc.username=${Value}
-jdbc.password=${Value}
-hibernate.show_sql=${Value}
-hibernate.dialect=${Value}
-hibernate.show_ddl=${Value}
-jdbc.url_test=${Value}
+* jdbc.driverClassName=${Value}
+* jdbc.url=${Value}
+* jdbc.username=${Value}
+* jdbc.password=${Value}
+* hibernate.show_sql=${Value}
+* hibernate.dialect=${Value}
+* hibernate.show_ddl=${Value}
+* jdbc.url_test=${Value}
 
 2.2.2 For mail.properties you must set the value like:
 
-host=${Value}
-port=${Value}
-user_name=${Value}
-mail_password=${Value}
-tran_prop_key=${Value}
-tran_prop_value=${Value}
-auth_key=${Value}
-auth_value=${Value}
-ssl_key=${Value}
-ssl_value=${Value}
-start_enable_key=${Value}
-start_enable_value=${Value}
+* host=${Value}
+* port=${Value}
+* user_name=${Value}
+* mail_password=${Value}
+* tran_prop_key=${Value}
+* tran_prop_value=${Value}
+* auth_key=${Value}
+* auth_value=${Value}
+* ssl_key=${Value}
+* ssl_value=${Value}
+* start_enable_key=${Value}
+* start_enable_value=${Value}
 
 2.2.3 For jwt.properties you must set the value like:
 
-jwt.secret=${Value}
+* jwt.secret=${Value}
 
 2.3 You must create the database manually or automatically.
 
