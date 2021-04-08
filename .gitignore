@@ -1,12 +1,6 @@
 
 ### IntelliJ IDEA ###
 .idea/
-.idea/artifacts
-.idea/compiler.xml
-.idea/workspace.xml
-.idea/dataSources.xml
-.idea/dataSources
-.idea/dataSources.local.xml
 
 target/bulletinBoardServer-1.0-SNAPSHOT.war
 
