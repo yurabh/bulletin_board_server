@@ -1,6 +1,6 @@
 
 ### IntelliJ IDEA ###
-.idea/*
+.idea/
 .idea/artifacts
 .idea/compiler.xml
 .idea/workspace.xml
