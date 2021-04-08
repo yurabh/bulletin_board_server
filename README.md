@@ -1,4 +1,4 @@
-                                                                 Bulletin Board Server Project.
+                                        Bulletin Board Server Project.
                 
 1)About the project.
                
