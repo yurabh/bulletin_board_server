@@ -1,6 +1,6 @@
 
 ### IntelliJ IDEA ###
-.idea/
+.idea
 
 
 target/bulletinBoardServer-1.0-SNAPSHOT.war
