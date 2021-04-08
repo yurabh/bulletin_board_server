@@ -24,7 +24,7 @@ the resources package like:
 * mail.properties.
 * jwt.properties.
 
-2.2.1 For db.properties you must set the value like:
+2.2.1 For db.properties you should set the value like:
 
 * jdbc.driverClassName=${Value}
 * jdbc.url=${Value}
@@ -35,7 +35,7 @@ the resources package like:
 * hibernate.show_ddl=${Value}
 * jdbc.url_test=${Value}
 
-2.2.2 For mail.properties you must set the value like:
+2.2.2 For mail.properties you should set the value like:
 
 * host=${Value}
 * port=${Value}
@@ -50,21 +50,21 @@ the resources package like:
 * start_enable_key=${Value}
 * start_enable_value=${Value}
 
-2.2.3 For jwt.properties you must set the value like:
+2.2.3 For jwt.properties you should set the value like:
 
 * jwt.secret=${Value}
 
-2.3 You must create the database manually or automatically.
+2.3 You should create the database manually or automatically.
 
 1)Scripts for creating a database and tables can be found in the root of the project
 in the directory sql.
 
 2)On the other hand, jpa can create a database and tables automatically,
-which you must set in db.properties.
+which you should set in db.properties.
 hibernate.show_ddl=${Value} - true instead of false.
 
 
-2.4 You must save the author to be able to obtain a token for the author and
+2.4 You should save the author to be able to obtain a token for the author and
 to be able to use the token to access secure endpoints.
 If you do not do this and try to access the protected endpoints you will get a 401
 unauthenticated error.
@@ -82,6 +82,6 @@ and you get token like: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXNzYWdl
 3.1 You can use Apache Tomcat server to run and deploy this application and
 create a war file in the maven section (plugins).
 
-3.2 You must use Apache Maven tool to collect the project. 
+3.2 You should use Apache Maven tool to collect the project. 
 You can find all the dependencies in the maven pom file of the project.
              
