@@ -1,15 +1,10 @@
-
 ### IntelliJ IDEA ###
 .idea
-
 
 target/bulletinBoardServer-1.0-SNAPSHOT.war
 
 ### Logger ###
 log_file.log
-
-### Description project ###
-bulletin_Board_Server_Project.txt
 
 ### iml one ###
 bulletinBoardServer.iml
@@ -24,6 +19,7 @@ scr/mail/main.iml
 ### target ###
 target
 
+### resources ###
 db.properties
 jwt.properties
 mail.properties
