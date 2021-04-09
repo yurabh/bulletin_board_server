@@ -84,5 +84,3 @@ create a war file in the maven section (plugins).
 
 3.2 You should use Apache Maven tool to collect the project. 
 You can find all the dependencies in the maven pom file of the project.
-             
-

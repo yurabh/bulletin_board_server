@@ -23,3 +23,7 @@ scr/mail/main.iml
 
 ### target ###
 target
+
+db.properties
+jwt.properties
+mail.properties
