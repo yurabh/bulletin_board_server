@@ -84,3 +84,7 @@ create a war file in the maven section (plugins).
 
 3.2 You should use Apache Maven tool to collect the project. 
 You can find all the dependencies in the maven pom file of the project.
+
+
+4.0 Run the tests.
+To run the tests use the clean and pack phase or phase test in the maven life cycle section.
