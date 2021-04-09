@@ -4,7 +4,7 @@
                
 This is a project of the server part of the purpose of which the management 
 of the authors of the ads work with the headings.
-This project performs theft operations as well as sending e-mails
+This project performs CRUD operations as well as sending e-mails
 to authors who are subscribed to a specific ad under a specific heading and
 a specific description.
 
